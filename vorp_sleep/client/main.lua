@@ -1,4 +1,4 @@
-local sleep, resting = 100, false
+local sleep, resting, restStartedAt = 100, false, 0
 local bedHashes, campfireHashes, nearbyObjects = {}, {}, { bed=nil, campfire=nil }
 for _, model in ipairs(Config.BedModels) do bedHashes[GetHashKey(model)] = true end
 for _, model in ipairs(Config.CampfireModels) do campfireHashes[GetHashKey(model)] = true end
@@ -15,7 +15,7 @@ local function scanObjects()
     end
 end
 CreateThread(function() while true do scanObjects(); Wait(Config.ObjectScanInterval) end end)
-RegisterNetEvent('vorp_sleep:state',function(s) sleep=s end)
+RegisterNetEvent('vorp_sleep:state',function(s) sleep=s; TriggerEvent('teot_survivalhud:setSleep', sleep) end)
 CreateThread(function() Wait(1000); TriggerServerEvent('vorp_sleep:requestState') end)
 local function playRestAnimation(kind)
     local a = kind == 'sleep' and Config.BedAnimation or Config.CampfireAnimation
@@ -24,7 +24,9 @@ local function playRestAnimation(kind)
     if HasAnimDictLoaded(a.dict) then TaskPlayAnim(PlayerPedId(), a.dict, a.name, 2.0, 2.0, -1, 1, 0.0, false, false, false) end
 end
 local function drawRestOverlay()
-    local a = Config.OverlayAlpha
+    local elapsed = (GetGameTimer() - restStartedAt) / 1000.0
+    local fade = math.max(0.0, math.min(1.0, elapsed / Config.FadeDelay))
+    local a = math.floor(Config.OverlayAlpha * fade)
     DrawRect(0.5, 0.08, 1.0, 0.16, 0, 0, 0, a)
     DrawRect(0.5, 0.92, 1.0, 0.16, 0, 0, 0, a)
     DrawRect(0.08, 0.5, 0.16, 0.68, 0, 0, 0, a)
@@ -32,7 +34,7 @@ local function drawRestOverlay()
 end
 local function rest(kind)
     if resting then return end
-    resting=true; playRestAnimation(kind); notify(kind == 'sleep' and 'Вы легли спать. Нажмите X, чтобы проснуться.' or 'Вы задремали. Нажмите X, чтобы проснуться.')
+    resting=true; restStartedAt=GetGameTimer(); playRestAnimation(kind); notify(kind == 'sleep' and 'Вы легли спать. Нажмите X, чтобы проснуться.' or 'Вы задремали. Нажмите X, чтобы проснуться.')
     local untilTime = GetGameTimer() + (kind=='sleep' and Config.SleepDuration or Config.NapDuration) * 1000
     while resting and GetGameTimer() < untilTime do
         Wait(0)

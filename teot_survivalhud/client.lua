@@ -3,6 +3,9 @@ local hudEnabled = true
 RegisterNetEvent('teot_survivalhud:setPsychology', function(psychology, sleep)
     SendNUIMessage({ action = 'psychology', psychology = psychology, sleep = sleep })
 end)
+RegisterNetEvent('teot_survivalhud:setSleep', function(sleep)
+    SendNUIMessage({ action = 'sleep', sleep = sleep })
+end)
 local lastVoiceState = nil
 local lastStatus = {
     health = nil,

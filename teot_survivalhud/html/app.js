@@ -1389,6 +1389,7 @@
       setGauge(statNodes.psychology, data.psychology);
       setGauge(statNodes.sleep, data.sleep);
     }
+    if (data.action === 'sleep') setGauge(statNodes.sleep, data.sleep);
     if (data.action === 'temperature') {
       updateTemperature(data);
     }
