@@ -5,7 +5,7 @@ for _, model in ipairs(Config.CampfireModels) do campfireHashes[GetHashKey(model
 local function notify(msg) TriggerEvent('vorp:TipRight', msg, 2500) end
 local function scanObjects()
     local p=GetEntityCoords(PlayerPedId()); nearbyObjects.bed=nil; nearbyObjects.campfire=nil
-    for _, object in ipairs(GetGamePool('CObject')) do
+    for _, object in ipairs(GetGamePool('CObject') or {}) do
         if DoesEntityExist(object) then
             local model=GetEntityModel(object); local distance= #(p-GetEntityCoords(object))
             if distance <= Config.InteractionDistance then
@@ -65,3 +65,7 @@ RegisterCommand('sleep_object', function()
     end
     if closest then notify(('Модель объекта: %s | hash: %s'):format(GetEntityModel(closest), GetEntityModel(closest))) end
 end, false)
+
+-- Test commands are useful while configuring map objects.
+RegisterCommand('sleep_test', function() rest('sleep') end, false)
+RegisterCommand('nap_test', function() rest('nap') end, false)
