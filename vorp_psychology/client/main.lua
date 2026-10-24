@@ -1,6 +1,6 @@
 local psychology = 100
 local function isNight(h) return h>=Config.NightStart or h<Config.NightEnd end
-RegisterNetEvent('vorp_psychology:state',function(value) psychology=value end)
+RegisterNetEvent('vorp_psychology:state',function(value) psychology=value; TriggerEvent('teot_survivalhud:setPsychology', psychology, 100) end)
 CreateThread(function() Wait(1000); TriggerServerEvent('vorp_psychology:requestState') end)
 CreateThread(function()
     while true do

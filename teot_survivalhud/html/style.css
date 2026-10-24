@@ -1,0 +1,797 @@
+@property --deg {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 360deg;
+}
+
+:root {
+  --gold: #cda15b;
+  --gold-bright: #f0c875;
+  --bone: #e4d2ad;
+  --shadow: rgba(0, 0, 0, .92);
+  --red: #a84f40;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  /* Explicit NUI transparency: never paint a full-screen black canvas. */
+  background: transparent !important;
+  background-color: rgba(0, 0, 0, 0) !important;
+  background-image: none !important;
+  user-select: none;
+  pointer-events: none;
+}
+
+#hud {
+  background: transparent !important;
+  background-color: rgba(0, 0, 0, 0) !important;
+  background-image: none !important;
+}
+
+html::before, html::after, body::before, body::after {
+  content: none !important;
+  display: none !important;
+}
+
+.hud {
+  position: absolute;
+  left: 50%;
+  bottom: 3.1vh;
+  transform: translateX(-50%) scale(1.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  opacity: 0;
+  transition: opacity 160ms ease;
+  filter: drop-shadow(0 2px 3px var(--shadow));
+}
+
+.hud.visible { opacity: 1; }
+
+.filigree {
+  width: 26px;
+  height: 22px;
+  flex: 0 0 26px;
+  overflow: visible;
+  fill: none;
+  stroke: rgba(205, 161, 91, .8);
+  stroke-width: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  margin: 0 -2px;
+}
+.filigree circle { fill: var(--gold); stroke: none; }
+.filigree path:nth-child(2) { stroke: rgba(228, 210, 173, .42); }
+
+.stat {
+  --deg: 360deg;
+  --ring-color: var(--gold);
+  position: relative;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  opacity: .92;
+  transform: translateZ(0);
+}
+
+.gauge {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--ring-color) 0deg var(--deg),
+    rgba(205, 161, 91, .17) var(--deg) 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.2px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.2px));
+}
+
+.rim {
+  position: absolute;
+  inset: 1.5px;
+  border: 1px solid rgba(205, 161, 91, .82);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(103, 77, 40, .3), transparent 48%),
+    linear-gradient(145deg, rgba(26, 22, 16, .96), rgba(7, 7, 6, .95));
+  box-shadow:
+    inset 0 0 0 1px rgba(10, 8, 5, .9),
+    0 0 0 1px rgba(8, 7, 5, .75);
+}
+
+.icon {
+  position: absolute;
+  inset: 4px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.icon svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: var(--bone);
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 1px rgba(0, 0, 0, .8));
+}
+
+.icon svg .filled {
+  fill: rgba(228, 210, 173, .88);
+  stroke: var(--bone);
+}
+.icon svg .filled-soft {
+  fill: rgba(205, 161, 91, .16);
+  stroke: var(--bone);
+}
+
+.stat.critical {
+  --ring-color: var(--red);
+  animation: danger-pulse 1.25s ease-in-out infinite;
+}
+.stat.critical .rim {
+  border-color: rgba(168, 79, 64, .95);
+}
+.stat.critical .icon svg {
+  stroke: #e8b4a6;
+}
+.stat.unknown { opacity: .58; }
+.stat.unknown .gauge { --deg: 0deg; }
+
+.stat.mic .gauge { display: none; }
+.stat.mic .rim { border-color: rgba(205, 161, 91, .66); }
+.stat.mic .icon svg { stroke: rgba(228, 210, 173, .7); }
+
+
+.stamina-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 72px;
+  height: 72px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+.stat[data-stat="stamina"] .rim {
+  z-index: 1;
+}
+.stat[data-stat="stamina"] .icon {
+  z-index: 3;
+}
+.stat[data-stat="stamina"].stamina-active .stamina-canvas {
+  opacity: 1;
+}
+.stat[data-stat="stamina"].stamina-active .rim {
+  border-color: rgba(220, 176, 96, .98);
+  box-shadow:
+    0 0 5px rgba(213, 151, 63, .34),
+    inset 0 0 4px rgba(205, 161, 91, .18);
+}
+.stat[data-stat="stamina"].stamina-active .icon svg {
+  stroke: #f0d69b;
+  filter: drop-shadow(0 0 1.5px rgba(240, 187, 86, .38));
+}
+
+
+/* Live stamina gauge: remaining amount is the ring fill; the badge shows its direction. */
+.stat[data-stat="stamina"] .gauge {
+  z-index: 2;
+  --ring-color: #cda15b;
+  transition: --deg 220ms linear, filter 180ms ease;
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2.5px), #000 calc(100% - 1px));
+}
+.stat[data-stat="stamina"].stamina-draining .gauge {
+  --ring-color: #e5a04c;
+  filter: drop-shadow(0 0 2px rgba(230, 145, 54, .62));
+}
+.stat[data-stat="stamina"].stamina-recovering .gauge {
+  --ring-color: #f0c875;
+  filter: drop-shadow(0 0 2px rgba(240, 200, 117, .58));
+}
+.stat[data-stat="stamina"].stamina-idle .gauge {
+  --ring-color: #b9955b;
+  filter: drop-shadow(0 0 1px rgba(205, 161, 91, .22));
+}
+.stat[data-stat="stamina"].stamina-empty .gauge {
+  --ring-color: #a84f40;
+  filter: drop-shadow(0 0 2px rgba(168, 79, 64, .52));
+}
+
+.stamina-state {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 10px;
+  height: 10px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  border: 1px solid rgba(205, 161, 91, .82);
+  background: rgba(16, 12, 7, .97);
+  color: #d9b36d;
+  font-family: Arial, sans-serif;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1;
+  z-index: 5;
+  box-shadow: 0 0 2px rgba(0, 0, 0, .9);
+  pointer-events: none;
+}
+.stamina-state::before { content: "·"; font-size: 11px; transform: translateY(-1px); }
+.stamina-state.is-draining {
+  color: #f0a04c;
+  border-color: rgba(240, 160, 76, .95);
+  box-shadow: 0 0 4px rgba(240, 145, 52, .38);
+}
+.stamina-state.is-draining::before { content: "↓"; transform: none; }
+.stamina-state.is-recovering {
+  color: #f5d38b;
+  border-color: rgba(245, 211, 139, .96);
+  box-shadow: 0 0 4px rgba(245, 211, 139, .35);
+}
+.stamina-state.is-recovering::before { content: "↑"; transform: none; }
+.stamina-state.is-empty {
+  color: #d47a68;
+  border-color: rgba(168, 79, 64, .98);
+}
+.stamina-state.is-empty::before { content: "!"; transform: none; }
+.stamina-state.is-unknown { opacity: .45; }
+.stamina-state.is-unknown::before { content: "?"; transform: none; }
+
+.fire-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 68px;
+  height: 68px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+.stat.mic .rim {
+  z-index: 1;
+  border-color: rgba(205, 161, 91, .66);
+}
+.stat.mic .icon {
+  z-index: 3;
+}
+.stat.mic .icon svg { stroke: rgba(228, 210, 173, .78); }
+
+.stat.mic.active {
+  opacity: 1;
+}
+.stat.mic.active .fire-canvas {
+  opacity: 1;
+}
+.stat.mic.active .rim {
+  border-color: rgba(205, 161, 91, .96);
+  box-shadow:
+    0 0 4px rgba(205, 133, 57, .25),
+    inset 0 0 4px rgba(205, 161, 91, .14);
+}
+.stat.mic.active .icon {
+  /* Keep the mic readable while letting the ignition wave show through. */
+  background: rgba(20, 14, 8, .16);
+}
+.stat.mic.active .icon svg {
+  stroke: #f0d39a;
+  filter: drop-shadow(0 0 2px rgba(240, 183, 83, .45));
+}
+
+@keyframes danger-pulse {
+  0%, 100% { opacity: .84; }
+  50% { opacity: 1; }
+}
+@keyframes mic-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.07); }
+}
+
+@media (max-width: 1366px) {
+  .hud { gap: 4px; bottom: 4.2vh; transform: translateX(-50%) scale(1.5); }
+  .stat { width: 30px; height: 30px; flex-basis: 30px; }
+  .icon svg { width: 14px; height: 14px; }
+  .filigree { width: 22px; flex-basis: 22px; }
+}
+@media (max-height: 720px) {
+  .hud { bottom: 3.3vh; transform: translateX(-50%) scale(1.5); }
+}
+
+
+/* Ensure the stamina amount ring is visibly shrinking/growing around the icon. */
+.stat[data-stat="stamina"] {
+  isolation: isolate;
+}
+.stat[data-stat="stamina"] .gauge {
+  z-index: 4 !important;
+  opacity: 1 !important;
+}
+.stat[data-stat="stamina"] .rim {
+  z-index: 3 !important;
+}
+.stat[data-stat="stamina"] .icon {
+  z-index: 5 !important;
+}
+.stat[data-stat="stamina"].stamina-draining .gauge {
+  animation: stamina-ring-pulse .7s ease-in-out infinite;
+}
+@keyframes stamina-ring-pulse {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(229, 160, 76, .45)); }
+  50% { filter: drop-shadow(0 0 4px rgba(245, 190, 96, .75)); }
+}
+
+
+/* v0.2.18: remove only the tiny lower status badge; keep stamina lightning canvas. */
+.stamina-state {
+  display: none !important;
+}
+.stat[data-stat="stamina"] .stamina-canvas {
+  display: block !important;
+}
+
+
+/* v0.2.19 FIX: the opaque ring/rim used to cover the lightning canvas. */
+.stat[data-stat="stamina"] {
+  isolation: isolate;
+}
+.stat[data-stat="stamina"] .gauge {
+  z-index: 1 !important;
+}
+.stat[data-stat="stamina"] .rim {
+  z-index: 2 !important;
+}
+.stat[data-stat="stamina"] .stamina-canvas {
+  display: block !important;
+  z-index: 4 !important;
+  opacity: 1;
+  background: transparent !important;
+}
+.stat[data-stat="stamina"] .icon {
+  z-index: 5 !important;
+}
+
+
+/* v0.2.20 — ignition starts inside the lightning icon, then discharges outward. */
+.stat[data-stat="stamina"].stamina-igniting .icon svg {
+  stroke: #fff0bd !important;
+  filter:
+    drop-shadow(0 0 2px rgba(255, 237, 186, .98))
+    drop-shadow(0 0 6px rgba(242, 173, 68, .95))
+    drop-shadow(0 0 10px rgba(221, 123, 35, .62)) !important;
+  transform: scale(1.08);
+}
+.stat[data-stat="stamina"].stamina-igniting .icon svg .filled {
+  fill: #fff0bd !important;
+}
+.stat[data-stat="stamina"].stamina-discharging .icon svg {
+  stroke: #f7d58e !important;
+  filter:
+    drop-shadow(0 0 2px rgba(255, 232, 174, .95))
+    drop-shadow(0 0 4px rgba(236, 157, 56, .72)) !important;
+}
+.stat[data-stat="stamina"].stamina-discharging .icon svg .filled {
+  fill: #f7d58e !important;
+}
+.stat[data-stat="stamina"] .icon svg {
+  transition: filter 100ms linear, transform 100ms ease, fill 100ms linear;
+}
+
+
+/* v0.2.22 — health pulse */
+.health-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 64px;
+  height: 64px;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  overflow: visible;
+}
+.stat[data-stat="health"] .gauge {
+  z-index: 1;
+}
+.stat[data-stat="health"] .rim {
+  z-index: 1;
+}
+.stat[data-stat="health"] .health-canvas {
+  opacity: 1;
+}
+.stat[data-stat="health"] .icon {
+  z-index: 3;
+}
+.stat[data-stat="health"].health-active .rim {
+  border-color: rgba(225, 175, 97, .92);
+  box-shadow:
+    0 0 4px rgba(214, 150, 64, .20),
+    inset 0 0 4px rgba(205, 161, 91, .16);
+}
+.stat[data-stat="health"].health-low .rim {
+  border-color: rgba(219, 150, 84, .96);
+  box-shadow:
+    0 0 5px rgba(214, 122, 54, .28),
+    inset 0 0 5px rgba(205, 136, 72, .18);
+}
+.stat[data-stat="health"].health-critical .rim {
+  border-color: rgba(183, 92, 76, .98);
+  box-shadow:
+    0 0 6px rgba(168, 79, 64, .34),
+    inset 0 0 6px rgba(168, 79, 64, .18);
+}
+.stat[data-stat="health"] .icon svg {
+  transition: transform 90ms linear, filter 90ms linear, stroke 120ms linear, fill 120ms linear;
+  transform-origin: 50% 50%;
+}
+.stat[data-stat="health"].health-active .icon svg {
+  stroke: #efd7a2;
+  filter:
+    drop-shadow(0 0 2px rgba(245, 198, 98, .28))
+    drop-shadow(0 0 4px rgba(214, 147, 56, .18));
+}
+.stat[data-stat="health"].health-low .icon svg {
+  stroke: #f0cd91;
+}
+.stat[data-stat="health"].health-critical .icon svg {
+  stroke: #efb1a1;
+  filter:
+    drop-shadow(0 0 2px rgba(228, 180, 166, .45))
+    drop-shadow(0 0 5px rgba(168, 79, 64, .32));
+}
+.stat[data-stat="health"].health-critical .icon svg .filled {
+  fill: rgba(232, 180, 166, .92);
+  stroke: #efb1a1;
+}
+
+
+/* v0.2.23 — animated water level inside the thirst medallion */
+.stat[data-stat="thirst"] {
+  isolation: isolate;
+}
+.stat[data-stat="thirst"] .gauge {
+  z-index: 1 !important;
+}
+.stat[data-stat="thirst"] .rim {
+  z-index: 2 !important;
+}
+.water-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  transform: translate(-50%, -50%);
+  opacity: 1 !important;
+  display: block !important;
+  pointer-events: none;
+  z-index: 4 !important;
+  background: transparent !important;
+  overflow: visible;
+}
+.stat[data-stat="thirst"] .icon {
+  z-index: 5 !important;
+}
+.stat[data-stat="thirst"] .icon svg {
+  filter:
+    drop-shadow(0 0 1px rgba(7, 7, 6, .95))
+    drop-shadow(0 0 1px rgba(240, 216, 164, .16));
+}
+.stat[data-stat="thirst"].water-low .rim {
+  border-color: rgba(213, 151, 77, .92);
+}
+.stat[data-stat="thirst"].water-critical .rim {
+  border-color: rgba(168, 79, 64, .94);
+  box-shadow:
+    0 0 4px rgba(168, 79, 64, .22),
+    inset 0 0 4px rgba(168, 79, 64, .10);
+}
+
+
+/* v0.2.24 — hunger embers: soft glow, then tiny living embers as food gets low */
+.stat[data-stat="hunger"] {
+  isolation: isolate;
+}
+.stat[data-stat="hunger"] .gauge {
+  z-index: 1 !important;
+}
+.stat[data-stat="hunger"] .rim {
+  z-index: 2 !important;
+}
+.hunger-canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 42px;
+  height: 42px;
+  transform: translate(-50%, -50%);
+  opacity: 1 !important;
+  display: block !important;
+  pointer-events: none;
+  z-index: 4 !important;
+  background: transparent !important;
+  overflow: visible;
+}
+.stat[data-stat="hunger"] .icon {
+  z-index: 5 !important;
+}
+.stat[data-stat="hunger"] .icon svg {
+  transition: filter 140ms ease, transform 140ms ease, stroke 140ms ease;
+}
+.stat[data-stat="hunger"].hunger-low .rim {
+  border-color: rgba(211, 145, 66, .92);
+  box-shadow:
+    0 0 4px rgba(213, 135, 48, .18),
+    inset 0 0 4px rgba(213, 135, 48, .10);
+}
+.stat[data-stat="hunger"].hunger-critical .rim {
+  border-color: rgba(181, 105, 65, .96);
+  box-shadow:
+    0 0 5px rgba(181, 105, 65, .28),
+    inset 0 0 5px rgba(181, 105, 65, .14);
+}
+.stat[data-stat="hunger"].hunger-active .icon svg {
+  filter:
+    drop-shadow(0 0 2px rgba(255, 211, 125, .20))
+    drop-shadow(0 0 4px rgba(207, 119, 43, .16));
+}
+.stat[data-stat="hunger"].hunger-low .icon svg {
+  filter:
+    drop-shadow(0 0 3px rgba(255, 204, 112, .42))
+    drop-shadow(0 0 5px rgba(210, 116, 39, .25));
+}
+.stat[data-stat="hunger"].hunger-critical .icon svg {
+  filter:
+    drop-shadow(0 0 3px rgba(255, 205, 127, .58))
+    drop-shadow(0 0 6px rgba(192, 85, 37, .36));
+}
+
+
+/* v0.2.26 — stronger visible ember effect */
+.stat[data-stat="hunger"].hunger-active .rim {
+  box-shadow:
+    0 0 3px rgba(214, 134, 46, .14),
+    inset 0 0 3px rgba(214, 134, 46, .08);
+}
+.stat[data-stat="hunger"].hunger-low .rim {
+  box-shadow:
+    0 0 5px rgba(213, 135, 48, .28),
+    inset 0 0 5px rgba(213, 135, 48, .14);
+}
+.stat[data-stat="hunger"].hunger-critical .rim {
+  box-shadow:
+    0 0 6px rgba(181, 105, 65, .34),
+    inset 0 0 6px rgba(181, 105, 65, .18);
+}
+
+
+/* v0.2.27 — soft pulsing for water and food icons */
+.stat[data-stat="thirst"] .icon svg,
+.stat[data-stat="hunger"] .icon svg {
+  transition: transform 140ms linear, filter 140ms linear, stroke 140ms linear, fill 140ms linear;
+  transform-origin: 50% 50%;
+}
+.stat[data-stat="thirst"].water-active .rim {
+  box-shadow:
+    0 0 3px rgba(189, 162, 112, .12),
+    inset 0 0 3px rgba(189, 162, 112, .07);
+}
+.stat[data-stat="thirst"].water-low .rim {
+  box-shadow:
+    0 0 4px rgba(197, 164, 109, .20),
+    inset 0 0 4px rgba(197, 164, 109, .10);
+}
+.stat[data-stat="thirst"].water-critical .rim {
+  box-shadow:
+    0 0 5px rgba(168, 79, 64, .26),
+    inset 0 0 5px rgba(168, 79, 64, .12);
+}
+
+
+/* v0.2.28 — wave-only water and more visible hunger burn */
+.stat[data-stat="hunger"].hunger-active .icon svg {
+  filter:
+    drop-shadow(0 0 2px rgba(255,220,155,.24))
+    drop-shadow(0 0 4px rgba(214,121,45,.18));
+}
+.stat[data-stat="water"] .icon svg {
+  background: transparent !important;
+}
+
+
+/* v0.2.30 — one adaptive ambient-temperature medallion. */
+.temperature-stat {
+  --temperature-color: var(--gold);
+  --ring-color: var(--gold);
+  opacity: .88;
+  transition: opacity 180ms ease, filter 180ms ease;
+}
+.temperature-stat .gauge {
+  z-index: 1;
+  --ring-color: var(--temperature-color);
+  transition: --deg 450ms ease, filter 180ms ease;
+}
+.temperature-stat .rim {
+  z-index: 2;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+.temperature-stat .icon { z-index: 3; }
+.temperature-stat .icon svg {
+  overflow: visible;
+  transition: stroke 180ms ease, filter 180ms ease, transform 180ms ease;
+}
+.temperature-stat .temperature-snow-full,
+.temperature-stat .temperature-flame-full,
+.temperature-stat .temperature-snow-half,
+.temperature-stat .temperature-flame-half {
+  display: none;
+}
+.temperature-stat.temperature-cold {
+  --temperature-color: #8ecff4;
+  --ring-color: #8ecff4;
+  opacity: .96;
+}
+.temperature-stat.temperature-moderate {
+  --temperature-color: var(--gold);
+  --ring-color: var(--gold);
+  opacity: .88;
+}
+.temperature-stat.temperature-heat {
+  --temperature-color: #e79a57;
+  --ring-color: #e79a57;
+  opacity: .96;
+}
+.temperature-stat.temperature-cold .temperature-snow-full,
+.temperature-stat.temperature-heat .temperature-flame-full,
+.temperature-stat.temperature-moderate .temperature-snow-half,
+.temperature-stat.temperature-moderate .temperature-flame-half {
+  display: inline;
+}
+.temperature-stat.temperature-cold .icon svg {
+  stroke: #9bdcff;
+  filter: drop-shadow(0 0 2px rgba(117, 202, 255, .5));
+  animation: temperature-cold-flicker 1.35s ease-in-out infinite;
+}
+.temperature-stat.temperature-cold .gauge,
+.temperature-stat.temperature-cold .rim {
+  border-color: rgba(142, 207, 244, .9);
+  box-shadow: 0 0 4px rgba(117, 202, 255, .22), inset 0 0 4px rgba(117, 202, 255, .12);
+}
+.temperature-stat.temperature-moderate .icon svg {
+  stroke: var(--bone);
+  filter: drop-shadow(0 0 1px rgba(205, 161, 91, .32));
+  animation: temperature-moderate-glow 3s ease-in-out infinite;
+}
+.temperature-stat.temperature-moderate .temperature-snow-half {
+  color: #a8c6d0;
+  stroke: #a8c6d0;
+}
+.temperature-stat.temperature-moderate .temperature-flame-half {
+  color: var(--gold-bright);
+  stroke: var(--gold-bright);
+}
+.temperature-stat.temperature-heat .icon svg {
+  stroke: #f0b36d;
+  filter: drop-shadow(0 0 2px rgba(240, 155, 83, .42));
+  animation: temperature-heat-flicker 1.05s ease-in-out infinite;
+}
+.temperature-stat.temperature-heat .gauge,
+.temperature-stat.temperature-heat .rim {
+  border-color: rgba(231, 154, 87, .92);
+  box-shadow: 0 0 4px rgba(231, 154, 87, .24), inset 0 0 4px rgba(231, 154, 87, .12);
+}
+/* Small glints move outward from the medallion, not across the screen. */
+.temperature-stat.temperature-cold::before,
+.temperature-stat.temperature-cold::after,
+.temperature-stat.temperature-heat::before,
+.temperature-stat.temperature-heat::after {
+  content: "";
+  position: absolute;
+  z-index: 4;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: var(--temperature-color);
+  box-shadow: 0 0 4px var(--temperature-color);
+}
+.temperature-stat.temperature-cold::before,
+.temperature-stat.temperature-heat::before {
+  top: 5px;
+  left: 8px;
+  animation: temperature-spark-left 1.4s ease-in-out infinite;
+}
+.temperature-stat.temperature-cold::after,
+.temperature-stat.temperature-heat::after {
+  right: 5px;
+  bottom: 7px;
+  animation: temperature-spark-right 1.15s ease-in-out infinite;
+}
+.temperature-stat.temperature-cold.temperature-warning .icon svg {
+  filter: drop-shadow(0 0 3px rgba(117, 202, 255, .7));
+}
+.temperature-stat.temperature-heat.temperature-warning .icon svg {
+  filter: drop-shadow(0 0 3px rgba(231, 154, 87, .65));
+}
+.temperature-stat.temperature-cold.temperature-critical {
+  --temperature-color: #c7efff;
+  --ring-color: #c7efff;
+  animation: temperature-extreme-cold 0.42s steps(2, end) infinite;
+  opacity: 1;
+}
+.temperature-stat.temperature-cold.temperature-critical .icon svg {
+  stroke: #c7efff;
+  filter: drop-shadow(0 0 3px rgba(160, 226, 255, .95)) drop-shadow(0 0 7px rgba(91, 183, 255, .68));
+  animation-duration: .42s;
+}
+.temperature-stat.temperature-cold.temperature-critical .gauge,
+.temperature-stat.temperature-cold.temperature-critical .rim {
+  border-color: #b8eaff;
+  box-shadow: 0 0 8px rgba(117, 202, 255, .68), inset 0 0 6px rgba(117, 202, 255, .28);
+}
+.temperature-stat.temperature-heat.temperature-critical {
+  --temperature-color: #c54b3d;
+  --ring-color: #c54b3d;
+  animation: temperature-extreme-heat .34s steps(2, end) infinite;
+  opacity: 1;
+}
+.temperature-stat.temperature-heat.temperature-critical .icon svg {
+  stroke: #ff8a69;
+  filter: drop-shadow(0 0 3px rgba(255, 105, 75, .95)) drop-shadow(0 0 7px rgba(197, 75, 61, .72));
+  animation-duration: .34s;
+}
+.temperature-stat.temperature-heat.temperature-critical .gauge,
+.temperature-stat.temperature-heat.temperature-critical .rim {
+  border-color: #c54b3d;
+  box-shadow: 0 0 8px rgba(197, 75, 61, .68), inset 0 0 6px rgba(197, 75, 61, .3);
+}
+.temperature-stat.temperature-unknown {
+  opacity: .22;
+  filter: grayscale(.35);
+}
+@keyframes temperature-cold-flicker {
+  0%, 100% { opacity: .78; transform: translateX(-.25px) rotate(-2deg); }
+  35% { opacity: 1; transform: translateX(.25px) rotate(1deg); }
+  68% { opacity: .86; transform: translateX(-.1px) rotate(-1deg); }
+}
+@keyframes temperature-moderate-glow {
+  0%, 100% { opacity: .82; filter: drop-shadow(0 0 1px rgba(205, 161, 91, .22)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 3px rgba(205, 161, 91, .42)); }
+}
+@keyframes temperature-heat-flicker {
+  0%, 100% { opacity: .82; transform: translateY(0) scale(1); }
+  30% { opacity: 1; transform: translateY(-.35px) scale(1.035); }
+  65% { opacity: .9; transform: translateY(.2px) scale(.99); }
+}
+@keyframes temperature-spark-left {
+  0%, 100% { opacity: .1; transform: translate(-1px, 1px) scale(.65); }
+  45% { opacity: 1; transform: translate(-3px, -2px) scale(1.25); }
+}
+@keyframes temperature-spark-right {
+  0%, 100% { opacity: .15; transform: translate(1px, 1px) scale(.65); }
+  50% { opacity: 1; transform: translate(3px, -2px) scale(1.2); }
+}
+@keyframes temperature-extreme-cold {
+  0%, 100% { filter: brightness(.8); }
+  50% { filter: brightness(1.35); }
+}
+@keyframes temperature-extreme-heat {
+  0%, 100% { filter: brightness(.78); }
+  50% { filter: brightness(1.45); }
+}

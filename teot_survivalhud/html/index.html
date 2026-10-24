@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TEOT Survival HUD</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="hud" class="hud" aria-label="Показатели выживания">
+    <svg class="filigree filigree-left" viewBox="0 0 54 22" aria-hidden="true">
+      <path d="M53 11H25c-6 0-7-7-13-7S5 8 2 11c3 3 4 7 10 7s7-7 13-7" />
+      <path d="M31 11c-4-6-9-6-12-6M31 11c-4 6-9 6-12 6M42 11l-4-3v6z" />
+      <circle cx="13" cy="11" r="1.5" />
+    </svg>
+
+    <div class="stat" data-stat="health" title="Здоровье" aria-label="Здоровье">
+      <div class="gauge"></div><div class="rim"></div>
+      <canvas class="health-canvas" data-health-canvas aria-hidden="true"></canvas>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="filled" d="M20.3 5.7c-2.1-2.2-5.4-1.8-8.3 1.1-2.9-2.9-6.2-3.3-8.3-1.1-2.3 2.4-1.7 6 .7 8.3L12 21l7.6-7c2.4-2.3 3-5.9.7-8.3Z"/></svg>
+      </div>
+    </div>
+
+    <div class="stat" data-stat="stamina" title="Выносливость" aria-label="Выносливость">
+      <div class="gauge"></div><div class="rim"></div>
+      <canvas class="stamina-canvas" data-stamina-canvas aria-hidden="true"></canvas>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="filled" d="M13.6 2.5 5.3 13h6l-.7 8.5L18.7 10h-6l.9-7.5Z"/></svg>
+      </div>
+    </div>
+
+    <div class="stat temperature-stat temperature-moderate" data-stat="temperature" title="Температура" aria-label="Температура">
+      <div class="gauge"></div><div class="rim"></div>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <defs>
+            <clipPath id="temp-snow-left"><rect x="0" y="0" width="12" height="24"/></clipPath>
+            <clipPath id="temp-fire-right"><rect x="12" y="0" width="12" height="24"/></clipPath>
+          </defs>
+          <g class="temperature-snow-full">
+            <path d="M12 2v20M3.5 7l17 10M3.5 17l17-10M8 4l4 2 4-2M8 20l4-2 4 2M4 11l-.5 4 4-.5M16.5 9.5 20.5 9 20 5M16 14.5l4 .5-.5 4"/>
+          </g>
+          <g class="temperature-flame-full">
+            <path d="M12 2c1.4 3.4-.7 5.1 1 7.5 1.1-1.3 2.1-2.7 2.4-4.4 2.8 2.8 4.6 5.9 4.6 9a8 8 0 0 1-16 0c0-3.2 1.9-6.1 5.2-9.4-.1 2.2.7 3.5 1.8 4.5C12.8 7 12.2 4.8 12 2Z"/>
+            <path d="M12 13c1.2 1.5 2.1 2.5 2.1 4a2.1 2.1 0 1 1-4.2 0c0-1 .6-2.1 2.1-4Z"/>
+          </g>
+          <g class="temperature-snow-half" clip-path="url(#temp-snow-left)">
+            <path d="M12 2v20M3.5 7l17 10M3.5 17l17-10M8 4l4 2 4-2M8 20l4-2 4 2M4 11l-.5 4 4-.5M16.5 9.5 20.5 9 20 5M16 14.5l4 .5-.5 4"/>
+          </g>
+          <g class="temperature-flame-half" clip-path="url(#temp-fire-right)">
+            <path d="M12 2c1.4 3.4-.7 5.1 1 7.5 1.1-1.3 2.1-2.7 2.4-4.4 2.8 2.8 4.6 5.9 4.6 9a8 8 0 0 1-16 0c0-3.2 1.9-6.1 5.2-9.4-.1 2.2.7 3.5 1.8 4.5C12.8 7 12.2 4.8 12 2Z"/>
+            <path d="M12 13c1.2 1.5 2.1 2.5 2.1 4a2.1 2.1 0 1 1-4.2 0c0-1 .6-2.1 2.1-4Z"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="stat" data-stat="hunger" title="Голод" aria-label="Голод">
+      <div class="gauge"></div><div class="rim"></div>
+      <canvas class="hunger-canvas" data-hunger-canvas aria-hidden="true"></canvas>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 3v6.2M4.3 3v4.2c0 1.9 1 3 2.2 3s2.2-1.1 2.2-3V3M6.5 10.2V21M16.5 3c-2 2.4-2.6 4.5-2.6 7.3v2.1h5.2V3M16.5 12.4V21"/></svg>
+      </div>
+    </div>
+
+    <div class="stat" data-stat="thirst" title="Жажда" aria-label="Жажда">
+      <div class="gauge"></div><div class="rim"></div>
+      <canvas class="water-canvas" data-water-canvas aria-hidden="true"></canvas>
+      <div class="icon">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="filled-soft" d="M12 2.6S5.5 10 5.5 14.5a6.5 6.5 0 0 0 13 0C18.5 10 12 2.6 12 2.6Z"/><path d="M9 15.5a3 3 0 0 0 3 3"/></svg>
+      </div>
+    </div>
+
+    <div class="stat" data-stat="psychology" title="Психика" aria-label="Психика">
+      <div class="gauge"></div><div class="rim"></div>
+      <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4.5a3 3 0 0 0-3 3 3 3 0 0 0-1 5.7A3 3 0 0 0 8 18h1v-5a2 2 0 1 1 2-2V8a3.5 3.5 0 0 0-2-3.5Z"/><path d="M15 4.5a3 3 0 0 1 3 3 3 3 0 0 1 1 5.7A3 3 0 0 1 16 18h-1v-5a2 2 0 1 0-2-2V8a3.5 3.5 0 0 1 2-3.5Z"/></svg></div>
+    </div>
+
+    <div class="stat" data-stat="sleep" title="Сон" aria-label="Сон">
+      <div class="gauge"></div><div class="rim"></div>
+      <div class="icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="filled" d="M5 17.5A8 8 0 0 0 18.8 8 7 7 0 1 1 5 17.5Z"/><path d="m17 3 .7 1.8L19.5 5l-1.8.7L17 7.5l-.7-1.8-1.8-.7 1.8-.7L17 3Z"/></svg></div>
+    </div>
+
+    <div class="stat mic" data-stat="microphone" title="Голосовой чат" aria-label="Микрофон">
+      <canvas class="fire-canvas" data-fire-canvas aria-hidden="true"></canvas>
+      <div class="rim"></div>
+      <div class="icon">
+        <svg class="mic-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7"/></svg>
+      </div>
+    </div>
+
+    <svg class="filigree filigree-right" viewBox="0 0 54 22" aria-hidden="true">
+      <path d="M1 11h28c6 0 7-7 13-7s7 4 10 7c-3 3-4 7-10 7s-7-7-13-7" />
+      <path d="M23 11c4-6 9-6 12-6M23 11c4 6 9 6 12 6M12 11l4-3v6z" />
+      <circle cx="41" cy="11" r="1.5" />
+    </svg>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
