@@ -1,7 +1,18 @@
 local psychology = 100
+local reportedDeaths = {}
 local function isNight(h) return h>=Config.NightStart or h<Config.NightEnd end
 RegisterNetEvent('vorp_psychology:state',function(value) psychology=value; TriggerEvent('teot_survivalhud:setPsychology', psychology, 100) end)
 CreateThread(function() Wait(1000); TriggerServerEvent('vorp_psychology:requestState') end)
+AddEventHandler('gameEventTriggered', function(name, args)
+    if name ~= 'CEventNetworkEntityDamage' then return end
+    local victim, attacker = args[1], args[2]
+    local ped = PlayerPedId()
+    if attacker ~= ped or not DoesEntityExist(victim) or victim == ped or not IsEntityDead(victim) then return end
+    if reportedDeaths[victim] then return end
+    reportedDeaths[victim] = true
+    TriggerServerEvent('vorp_psychology:reportKill', IsPedAPlayer(victim) and 'player' or 'zombie')
+    SetTimeout(15000, function() reportedDeaths[victim] = nil end)
+end)
 CreateThread(function()
     while true do
         Wait(Config.TickSeconds*1000)

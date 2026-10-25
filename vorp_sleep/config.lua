@@ -3,6 +3,8 @@ Config.SleepDuration = 30
 Config.NapDuration = 20
 Config.SleepGain = 100
 Config.NapGain = 45
+Config.SleepDrainInterval = 60
+Config.SleepDrainAmount = 100 / (3 * 60)
 
 -- INPUT_CONTEXT / E
 Config.SitControl = 0xCEFD9220

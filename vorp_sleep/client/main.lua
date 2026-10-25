@@ -386,6 +386,13 @@ end)
 
 CreateThread(function()
     while true do
+        Wait(Config.SleepDrainInterval * 1000)
+        if not usingFurniture then TriggerServerEvent('vorp_sleep:drainTick') end
+    end
+end)
+
+CreateThread(function()
+    while true do
         if not usingFurniture then
             local ped = PlayerPedId()
             if DoesEntityExist(ped)

@@ -13,6 +13,10 @@ RegisterNetEvent('vorp_psychology:zombieNearby', function(isNearby)
         local s=getState(source); s.psychology=clamp(s.psychology-Config.StressPerTick.zombie); send(source)
     end
 end)
+RegisterNetEvent('vorp_psychology:reportKill', function(kind)
+    if kind ~= 'zombie' and kind ~= 'player' then return end
+    local s=getState(source); s.psychology=clamp(s.psychology-Config.KillPsychologyLoss[kind]); send(source)
+end)
 RegisterNetEvent('vorp_psychology:recover', function(kind)
     local src=source; local s=getState(src); local now=os.time(); cooldowns[src]=cooldowns[src] or {}
     local gain, cd = kind=='coffee' and Config.CoffeePsychologyGain or Config.CigarettePsychologyGain, kind=='coffee' and Config.CoffeeCooldown or Config.CigaretteCooldown
