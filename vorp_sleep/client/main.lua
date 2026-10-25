@@ -50,7 +50,7 @@ end
 
 local function ensureLiePrompt()
     if not liePrompt then
-        liePrompt = createPrompt(Config.SitControl, Config.LiePromptText or 'Lie Down', true)
+        liePrompt = createPrompt(Config.SitControl, Config.LiePromptText or 'Лечь', true)
         setPromptVisible(liePrompt, true)
     end
 end
@@ -291,17 +291,17 @@ end
 
 RegisterCommand('sitdebug', function()
     debugEnabled = not debugEnabled
-    print(('[redm_sitting] Debug %s'):format(debugEnabled and 'ENABLED' or 'DISABLED'))
+    print(('[vorp_sleep] Отладка: %s'):format(debugEnabled and 'ВКЛЮЧЕНА' or 'ВЫКЛЮЧЕНА'))
 
     if debugEnabled then
         local object, distance = findClosestObjectForDebug(PlayerPedId(), 3.0)
         if object then
             local model = GetEntityModel(object)
             local kind = seatHashes[model] and 'seat' or (bedHashes[model] and 'bed' or 'unsupported')
-            print(('[redm_sitting] Closest object: entity=%s modelHash=%s distance=%.2f type=%s'):format(object, model, distance, kind))
-            print('[redm_sitting] If this is the furniture you want, send me the modelHash above.')
+            print(('[vorp_sleep] Ближайший объект: entity=%s modelHash=%s distance=%.2f type=%s'):format(object, model, distance, kind))
+            print('[vorp_sleep] Если это нужный объект, сохраните его modelHash.')
         else
-            print('[redm_sitting] No object found within 3 meters.')
+            print('[vorp_sleep] В радиусе 3 метров объект не найден.')
         end
     end
 end, false)
@@ -331,16 +331,16 @@ local function printNearbyObjects(radius, limit)
 
     table.sort(found, function(a, b) return a.distance < b.distance end)
 
-    print(('[redm_sitting] Nearby objects within %.2fm:'):format(radius))
+    print(('[vorp_sleep] Объекты в радиусе %.2f м:'):format(radius))
     local count = math.min(#found, limit)
     if count == 0 then
-        print('[redm_sitting]   none')
+        print('[vorp_sleep]   нет объектов')
         return
     end
 
     for i = 1, count do
         local item = found[i]
-        print(('[redm_sitting]   #%d entity=%s modelHash=%s distance=%.2f type=%s'):format(
+        print(('[vorp_sleep]   #%d entity=%s modelHash=%s distance=%.2f type=%s'):format(
             i, item.entity, item.model, item.distance, item.kind
         ))
     end
@@ -354,12 +354,12 @@ RegisterCommand('sitstatus', function()
     local ped = PlayerPedId()
     if nearestInteraction and DoesEntityExist(nearestInteraction.entity) then
         local liveDistance = vecDistance(GetEntityCoords(ped), GetEntityCoords(nearestInteraction.entity))
-        print(('[redm_sitting] status usingFurniture=%s targetKind=%s model=%s entity=%s scanDistance=%.2f liveEntityDistance=%.2f'):format(
+        print(('[vorp_sleep] статус: используется=%s тип=%s модель=%s entity=%s дистанция=%.2f текущаяДистанция=%.2f'):format(
             tostring(usingFurniture), tostring(nearestInteraction.kind), tostring(nearestInteraction.model),
             tostring(nearestInteraction.entity), tonumber(nearestInteraction.distance or -1), liveDistance
         ))
     else
-        print(('[redm_sitting] status usingFurniture=%s target=none liePrompt=%s'):format(
+        print(('[vorp_sleep] статус: объект отсутствует, используется=%s promptЛечь=%s'):format(
             tostring(usingFurniture), tostring(liePrompt ~= nil)
         ))
     end
@@ -381,7 +381,7 @@ CreateThread(function()
     for _ in pairs(Config.Seats) do seatCount = seatCount + 1 end
     for _ in pairs(Config.Beds or {}) do bedCount = bedCount + 1 end
     for _ in pairs(Config.BedHashes or {}) do bedCount = bedCount + 1 end
-    print(('[redm_sitting] Loaded %d seat models and %d bed models.'):format(seatCount, bedCount))
+    print(('[vorp_sleep] Загружено моделей для сидения: %d, моделей кроватей: %d.'):format(seatCount, bedCount))
 end)
 
 CreateThread(function()
@@ -412,7 +412,7 @@ CreateThread(function()
             waitTime = 0
             setPromptVisible(sitPrompt, false)
                     setPromptVisible(standPrompt, true)
-            showPromptGroup(activeInteraction and activeInteraction.kind == 'bed' and (Config.BedPromptGroupText or 'Bed') or Config.PromptGroupText)
+            showPromptGroup(activeInteraction and activeInteraction.kind == 'bed' and (Config.BedPromptGroupText or 'Кровать') or Config.PromptGroupText)
 
             local required = (restKind == 'sleep' and Config.SleepDuration or Config.NapDuration) * 1000
             if not restRecovered and restStartedAt > 0 and GetGameTimer() - restStartedAt >= required then
@@ -440,7 +440,7 @@ CreateThread(function()
             setPromptVisible(sitPrompt, not isBed)
             if isBed then
                 ensureLiePrompt()
-                showPromptGroup(Config.BedPromptGroupText or 'Bed')
+                showPromptGroup(Config.BedPromptGroupText or 'Кровать')
             else
                 removeLiePrompt()
                 showPromptGroup(Config.PromptGroupText)
@@ -473,7 +473,7 @@ CreateThread(function()
             if object then
                 local model = GetEntityModel(object)
                 local kind = seatHashes[model] and 'seat' or (bedHashes[model] and 'bed' or 'unsupported')
-                print(('[redm_sitting] nearby object modelHash=%s distance=%.2f type=%s'):format(model, distance, kind))
+                print(('[vorp_sleep] ближайший объект modelHash=%s distance=%.2f type=%s'):format(model, distance, kind))
             end
             Wait(2500)
         else

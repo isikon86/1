@@ -21,11 +21,11 @@ Config.ToggleToStand = true
 Config.AllowCancelToStand = true
 Config.CancelControl = 0x156F7119
 
-Config.PromptText = 'Sit'
-Config.PromptGroupText = 'Seat'
-Config.StandPromptText = 'Stand'
-Config.LiePromptText = 'Lie Down' -- hold E
-Config.BedPromptGroupText = 'Bed'
+Config.PromptText = 'Сесть'
+Config.PromptGroupText = 'Место для сидения'
+Config.StandPromptText = 'Встать'
+Config.LiePromptText = 'Лечь' -- удерживайте E
+Config.BedPromptGroupText = 'Кровать'
 Config.BedInteractDistance = 2.0
 
 -- Default placement values. Most RDR2 chairs use these.
