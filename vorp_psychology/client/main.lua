@@ -1,8 +1,24 @@
 local psychology = 100
 local reportedDeaths = {}
+local lightHashes = {}
+for _, model in ipairs(Config.LightModels) do lightHashes[GetHashKey(model)] = true end
+local function isNearLight()
+    local p=GetEntityCoords(PlayerPedId())
+    for _, object in ipairs(GetGamePool('CObject') or {}) do
+        if DoesEntityExist(object) and lightHashes[GetEntityModel(object)] and #(p-GetEntityCoords(object)) <= Config.LightProtectionRadius then return true end
+    end
+    return false
+end
 local function isNight(h) return h>=Config.NightStart or h<Config.NightEnd end
 RegisterNetEvent('vorp_psychology:state',function(value) psychology=value; TriggerEvent('teot_survivalhud:setPsychology', psychology, 100) end)
 CreateThread(function() Wait(1000); TriggerServerEvent('vorp_psychology:requestState') end)
+CreateThread(function()
+    while true do
+        local protected=isNearLight()
+        TriggerServerEvent('vorp_psychology:lightState', protected)
+        Wait(1000)
+    end
+end)
 AddEventHandler('gameEventTriggered', function(name, args)
     if name ~= 'CEventNetworkEntityDamage' then return end
     local victim, attacker = args[1], args[2]

@@ -1,21 +1,29 @@
 local state, cooldowns = {}, {}
 local function clamp(v) return math.max(0, math.min(100, v)) end
-local function getState(src) state[src] = state[src] or { psychology=100 }; return state[src] end
+local function getState(src) state[src] = state[src] or { psychology=100, lightProtected=false }; return state[src] end
 local function send(src) local s=getState(src); TriggerClientEvent('vorp_psychology:state',src,s.psychology) end
 RegisterNetEvent('vorp_psychology:requestState', function() send(source) end)
 RegisterNetEvent('vorp_psychology:addStress', function(amount)
     amount=tonumber(amount) or 0; if amount<0 or amount>25 then return end
-    local s=getState(source); s.psychology=clamp(s.psychology-amount); send(source)
+    local s=getState(source); if s.lightProtected then amount=amount*Config.LightStressMultiplier end
+    s.psychology=clamp(s.psychology-amount); send(source)
+end)
+RegisterNetEvent('vorp_psychology:lightState', function(protected)
+    getState(source).lightProtected = protected == true
 end)
 -- Zombie resources can report proximity without depending on this resource's internals.
 RegisterNetEvent('vorp_psychology:zombieNearby', function(isNearby)
     if isNearby then
-        local s=getState(source); s.psychology=clamp(s.psychology-Config.StressPerTick.zombie); send(source)
+        local s=getState(source); local loss=Config.StressPerTick.zombie
+        if s.lightProtected then loss=loss*Config.LightStressMultiplier end
+        s.psychology=clamp(s.psychology-loss); send(source)
     end
 end)
 RegisterNetEvent('vorp_psychology:reportKill', function(kind)
     if kind ~= 'zombie' and kind ~= 'player' then return end
-    local s=getState(source); s.psychology=clamp(s.psychology-Config.KillPsychologyLoss[kind]); send(source)
+    local s=getState(source); local loss=Config.KillPsychologyLoss[kind]
+    if s.lightProtected then loss=loss*Config.LightStressMultiplier end
+    s.psychology=clamp(s.psychology-loss); send(source)
 end)
 RegisterNetEvent('vorp_psychology:recover', function(kind)
     local src=source; local s=getState(src); local now=os.time(); cooldowns[src]=cooldowns[src] or {}
