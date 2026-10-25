@@ -21,14 +21,20 @@ local function playRestAnimation(kind)
     local a = kind == 'sleep' and Config.BedAnimation or Config.CampfireAnimation
     local ped = PlayerPedId()
     ClearPedTasksImmediately(ped)
-    -- Scenarios are more reliable in RedM than GTA-style TaskPlayAnim calls.
-    local scenario = kind == 'sleep' and 'WORLD_HUMAN_SLEEP_GROUND' or 'WORLD_HUMAN_SIT_GROUND'
-    TaskStartScenarioInPlace(ped, GetHashKey(scenario), -1, true, false, false, false)
-    Wait(300)
-    if IsPedUsingAnyScenario(ped) then return end
-    RequestAnimDict(a.dict); local timeout = GetGameTimer() + 5000
+    RequestAnimDict(a.dict)
+    local timeout = GetGameTimer() + 10000
     while not HasAnimDictLoaded(a.dict) and GetGameTimer() < timeout do Wait(0) end
-    if HasAnimDictLoaded(a.dict) then TaskPlayAnim(ped, a.dict, a.name, 2.0, 2.0, -1, 1, 0.0, false, false, false) end
+    if not HasAnimDictLoaded(a.dict) then
+        print(('[vorp_sleep] Animation dictionary failed: %s'):format(a.dict))
+        return false
+    end
+    TaskPlayAnim(ped, a.dict, a.name, 1.0, 8.0, -1, 31, 0.0, false, false, false)
+    Wait(250)
+    if not IsEntityPlayingAnim(ped, a.dict, a.name, 3) then
+        print(('[vorp_sleep] Animation failed: %s/%s'):format(a.dict, a.name))
+        return false
+    end
+    return true
 end
 local function drawRestOverlay()
     local elapsed = (GetGameTimer() - restStartedAt) / 1000.0
