@@ -3,6 +3,7 @@ local reportedDeaths = {}
 local lightHashes = {}
 for _, model in ipairs(Config.LightModels) do lightHashes[GetHashKey(model)] = true end
 local function isNearLight()
+    if not isNight(GetClockHours()) then return false end
     local p=GetEntityCoords(PlayerPedId())
     for _, object in ipairs(GetGamePool('CObject') or {}) do
         if DoesEntityExist(object) and lightHashes[GetEntityModel(object)] and #(p-GetEntityCoords(object)) <= Config.LightProtectionRadius then return true end
