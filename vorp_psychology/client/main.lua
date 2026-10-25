@@ -33,7 +33,11 @@ CreateThread(function()
     while true do
         Wait(Config.TickSeconds*1000)
         if IsPedShooting(PlayerPedId()) then TriggerServerEvent('vorp_psychology:addStress',Config.StressPerTick.shooting) end
-        if isNight(GetClockHours()) then TriggerServerEvent('vorp_psychology:addStress',Config.StressPerTick.night) end
+        if isNight(GetClockHours()) then
+            TriggerServerEvent('vorp_psychology:addStress',Config.StressPerTick.night)
+        else
+            TriggerServerEvent('vorp_psychology:addStress',Config.StressPerTick.day)
+        end
         if Config.BloodMoon then TriggerServerEvent('vorp_psychology:addStress',Config.StressPerTick.bloodMoon) end
     end
 end)

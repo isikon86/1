@@ -1,6 +1,6 @@
 Config = {}
 Config.TickSeconds = 10
-Config.StressPerTick = { shooting = 2, zombie = 3, night = 0.5, bloodMoon = 2 }
+Config.StressPerTick = { shooting = 2, zombie = 3, day = 0.05, night = 0.5, bloodMoon = 2 }
 Config.KillPsychologyLoss = { zombie = 2, player = 10 }
 Config.NightStart, Config.NightEnd = 21, 6
 Config.BloodMoon = false
