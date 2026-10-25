@@ -32,6 +32,17 @@ RegisterNetEvent('vorp_psychology:recover', function(kind)
     if cooldowns[src][kind] and cooldowns[src][kind]>now then return end
     cooldowns[src][kind]=now+cd; s.psychology=clamp(s.psychology+gain); send(src)
 end)
+RegisterNetEvent('vorp_psychology:useCoffee', function()
+    local src=source; local now=os.time(); cooldowns[src]=cooldowns[src] or {}
+    if cooldowns[src].coffee and cooldowns[src].coffee>now then return end
+    cooldowns[src].coffee=now+Config.CoffeeCooldown
+    local s=getState(src); s.psychology=clamp(s.psychology-Config.CoffeePsychologyLoss); send(src)
+    TriggerEvent('vorp_sleep:modify', src, Config.CoffeeSleepGain)
+end)
+RegisterNetEvent('vorp_psychology:useAlcohol', function()
+    local src=source; local s=getState(src); s.psychology=clamp(s.psychology+Config.AlcoholPsychologyGain); send(src)
+    TriggerEvent('vorp_sleep:modify', src, -Config.AlcoholSleepLoss)
+end)
 AddEventHandler('vorp_psychology:recoverFromRest', function(src,kind)
     local s=getState(src); s.psychology=clamp(s.psychology+(kind=='sleep' and Config.SleepPsychologyGain or Config.NapPsychologyGain)); send(src)
 end)

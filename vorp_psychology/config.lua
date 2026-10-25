@@ -5,6 +5,8 @@ Config.KillPsychologyLoss = { zombie = 2, player = 10 }
 Config.NightStart, Config.NightEnd = 21, 6
 Config.BloodMoon = false
 Config.CoffeePsychologyGain, Config.CigarettePsychologyGain = 10, 8
+Config.CoffeeSleepGain, Config.CoffeePsychologyLoss = 15, 3
+Config.AlcoholPsychologyGain, Config.AlcoholSleepLoss = 15, 10
 Config.SleepPsychologyGain, Config.NapPsychologyGain = 45, 20
 Config.CigaretteCooldown, Config.CoffeeCooldown = 600, 300
 Config.CigaretteItem, Config.CoffeeItem = 'cigarette', 'coffee'

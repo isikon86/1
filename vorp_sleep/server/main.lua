@@ -1,5 +1,9 @@
 local state = {}
 local lastDrain = {}
+local function changeSleep(src, amount)
+    local s=getState(src); s.sleep=clamp(s.sleep+(tonumber(amount) or 0)); TriggerClientEvent('vorp_sleep:state',src,s.sleep)
+end
+AddEventHandler('vorp_sleep:modify', function(src, amount) changeSleep(src, amount) end)
 local function clamp(v) return math.max(0, math.min(100, v)) end
 local function getState(src) state[src] = state[src] or { sleep=100 }; return state[src] end
 RegisterNetEvent('vorp_sleep:requestState', function() local s=getState(source); TriggerClientEvent('vorp_sleep:state',source,s.sleep) end)

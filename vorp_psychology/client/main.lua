@@ -58,5 +58,6 @@ CreateThread(function()
         if psychology<40 then SetTimecycleModifier('spectator5'); SetTimecycleModifierStrength((40-psychology)/100.0) else ClearTimecycleModifier() end
     end
 end)
-RegisterNetEvent('vorp_psychology:useCoffee',function() TriggerServerEvent('vorp_psychology:recover','coffee') end)
+RegisterNetEvent('vorp_psychology:useCoffee',function() TriggerServerEvent('vorp_psychology:useCoffee') end)
 RegisterNetEvent('vorp_psychology:useCigarette',function() TriggerServerEvent('vorp_psychology:recover','cigarette') end)
+RegisterNetEvent('vorp_psychology:useAlcohol',function() TriggerServerEvent('vorp_psychology:useAlcohol') end)
